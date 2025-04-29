@@ -19,7 +19,7 @@ const winningCombinations = [
 
 const GameBoard = () => {
     const [mode, setMode] = useState<Mode | null>(null);
-    const [board, setBoard] = useState<Array<string | null>>(Array(9).fill(null));
+    const [board, setBoard] = useState<Array<Player | null>>(Array(9).fill(null));
     const [currentPlayer, setCurrentPlayer] = useState<Player>(Player.X);
     const [winner, setWinner] = useState<string | null>(null);
 
@@ -39,16 +39,26 @@ const GameBoard = () => {
         return null;
     };
 
-    const makeComputerMove = (currentBoard: Array<string | null>) => {
-        const emptyIndexes = currentBoard
-            .map((val, i) => (val === null ? i : null))
-            .filter((v): v is number => v !== null);
+    const findWinningMove = (board: Array<Player | null>, player: Player): number | null => {
+        for (let [a, b, c] of winningCombinations) {
+            const line = [board[a], board[b], board[c]];
+            const cells = [a, b, c];
 
-        if (emptyIndexes.length === 0) return;
+            const playerCount = line.filter(cell => cell === player).length;
+            const emptyCount = line.filter(cell => cell === null).length;
 
-        const randomIndex = emptyIndexes[Math.floor(Math.random() * emptyIndexes.length)];
-        const newBoard = [...currentBoard];
-        newBoard[randomIndex] = Player.O;
+            if (playerCount === 2 && emptyCount === 1) {
+                return cells[line.indexOf(null)];
+            }
+        }
+
+        return null;
+    };
+
+
+    const placeMove = (boardSnapshot: Array<Player | null>, index: number, player: Player) => {
+        const newBoard = [...boardSnapshot];
+        newBoard[index] = player;
         setBoard(newBoard);
 
         const win = checkWinner(newBoard);
@@ -56,6 +66,30 @@ const GameBoard = () => {
             setWinner(win);
         }
     };
+
+    const makeComputerMove = (currentBoard: Array<Player | null>) => {
+        const winningMove = findWinningMove(currentBoard, Player.O);
+        if (winningMove !== null) {
+            placeMove(currentBoard, winningMove, Player.O);
+            return;
+        }
+
+        const blockMove = findWinningMove(currentBoard, Player.X);
+        if (blockMove !== null) {
+            placeMove(currentBoard, blockMove, Player.O);
+            return;
+        }
+
+        const emptyIndexes = currentBoard
+            .map((val, i) => (val === null ? i : null))
+            .filter((v): v is number => v !== null);
+
+        if (emptyIndexes.length === 0) return;
+
+        const randomIndex = emptyIndexes[Math.floor(Math.random() * emptyIndexes.length)];
+        placeMove(currentBoard, randomIndex, Player.O);
+    };
+
 
     const handleClick = (index: number) => {
         if (board[index] || winner) return;
