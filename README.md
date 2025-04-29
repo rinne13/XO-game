@@ -29,15 +29,17 @@ npm install
 ```
 
 2. How to start?
-```bash 
+
+```bash
  npm run dev
 ```
+
 Open in your browser at http://localhost:5173/ (or whatever Vite shows)
 
 3. Possible Future Improvements
--  Play against computer (AI)
--  Score tracking
--  Animations and transitions
--  Mobile responsiveness
--  Move history with undo
 
+- Play against computer (AI)
+- Score tracking
+- Animations and transitions
+- Mobile responsiveness
+- Move history with undo
